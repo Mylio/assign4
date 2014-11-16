@@ -17,6 +17,9 @@ int countBulletFrame;    //Bullet Time Counter
 int bulletNum;           //Bullet Order Number
 
 /*--------Put Variables Here---------*/
+int life ;
+int laserNum;
+int countLaserFrame;
 
 
 void setup() {
@@ -37,15 +40,25 @@ void setup() {
   reset();
 }
 
+    /*---------function Print Text-------------*/
+void printText(String textM,String textS,float y) {
+  fill(95,194,226);
+  textSize(40);
+  text(textM,width/2,y);
+  textSize(20);
+  text(textS,width/2,y+40);
+  textAlign(CENTER);
+}
+
 void draw() {
   background(50, 50, 50);
   noStroke();
-
+  
   switch(status) {
 
   case GAME_START:
     /*---------Print Text-------------*/
-    text("press enter", 320, 240); // replace this with printText
+    printText("GALIXIAN","press enter",240);
     /*--------------------------------*/
     break;
 
@@ -59,25 +72,24 @@ void draw() {
     drawAlien();
     drawBullet();
     drawLaser();
-
+    
     /*---------Call functions---------------*/
-
-
+    checkRubyDrop(10);//woo//change
+    alienShoot(50);//woo~
     checkAlienDead();/*finish this function*/
     checkShipHit();  /*finish this function*/
-
     countBulletFrame+=1;
     break;
 
   case GAME_PAUSE:
     /*---------Print Text-------------*/
-
+    printText("PAUSE","Press ENTER to Resume",240);
     /*--------------------------------*/
     break;
 
   case GAME_WIN:
     /*---------Print Text-------------*/
-
+    printText("WINNER","SCORE:"+point,300);
     /*--------------------------------*/
     winAnimate();
     break;
@@ -85,7 +97,7 @@ void draw() {
   case GAME_LOSE:
     loseAnimate();
     /*---------Print Text-------------*/
-
+    printText("BOOM","You are dead!",240);
     /*--------------------------------*/
     break;
   }
@@ -114,14 +126,25 @@ void keyPressed() {
 }
 
 /*---------Make Alien Function-------------*/
-void alienMaker() {
-  aList[0]= new Alien(50, 50);
+void alienMaker(int amount,int col) {
+  int row = 0;
+  for(int i=0;i < amount;i++){
+    if(i%col == 0){
+    row ++;
+    }
+  aList[i] = new Alien(50 + 40*(i%col), 50 + row*50);
+  }
+//  aList[0]= new Alien(50, 50);
+  
 }
 
 void drawLife() {
   fill(230, 74, 96);
   text("LIFE:", 36, 455);
   /*---------Draw Ship Life---------*/
+  for(int i = 0; i < life ;i++ ){
+  ellipse(78+25*i,459,15,15);
+  }
 }
 
 void drawBullet() {
@@ -143,12 +166,27 @@ void drawLaser() {
     if (laser!=null && !laser.gone) { // Check Array isn't empty and Laser still exist
       laser.move();      //Move Laser
       laser.display();   //Draw Laser
-      if (laser.lY>480) {
+      if (laser.lY>480) {//woo >480 
         removeLaser(laser); //Remove Laser from the Screen
       }
     }
   }
 }
+
+//===============
+void drawRuby() {
+  for (int i=0; i<lList.length-1; i++) { 
+    Laser laser = lList[i];
+    if (laser!=null && !laser.gone) { // Check Array isn't empty and Laser still exist
+      laser.move();      //Move Laser
+      laser.display();   //Draw Laser
+      if (laser.lY>480) {//woo >480 
+        removeLaser(laser); //Remove Laser from the Screen
+      }
+    }
+  }
+}
+//===============
 
 void drawAlien() {
   for (int i=0; i<aList.length-1; i++) {
@@ -157,9 +195,17 @@ void drawAlien() {
       alien.move();    //Move Alien
       alien.display(); //Draw Alien
       /*---------Call Check Line Hit---------*/
-
+        if(alien.aY >= 420){
+          status = GAME_LOSE ;
+        }
       /*--------------------------------------*/
     }
+    
+    else if(alien == null && point == 33*10){//amount
+      status = GAME_WIN ;
+    //now here
+    }
+   
   }
 }
 
@@ -197,14 +243,42 @@ void checkAlienDead() {
     for (int j=0; j<aList.length-1; j++) {
       Alien alien = aList[j];
       if (bullet != null && alien != null && !bullet.gone && !alien.die // Check Array isn't empty and bullet / alien still exist
-      /*------------Hit detect-------------*/        ) {
+      /*------------Hit detect-------------*/
+      &&  bList[i].bX <= (aList[j].aX + aList[j].aSize)  
+      &&  bList[i].bX >= (aList[j].aX - aList[j].aSize)
+      &&  bList[i].bY <= (aList[j].aY + aList[j].aSize)  
+      &&  bList[i].bY >= (aList[j].aY - aList[j].aSize)
+      ) {
         /*-------do something------*/
+        removeBullet(bList[i]);
+        removeAlien(aList[j]);
+        point+= 10 ;
       }
     }
   }
 }
 
 /*---------Alien Drop Laser-----------------*/
+void alienShoot(int frameShoot){
+  if(frameCount%frameShoot==0){//draw() ->The default rate is 60 frames per second. 
+    
+    for (int i=0; i< 3; i++) { //3 laser per time
+      Alien alien = aList[i];
+      if(alien!=null && !alien.die){  
+          int r =int(random(33));
+          if(laserNum < 30){
+          lList[laserNum++] = new Laser(aList[r].aX,aList[r].aY);
+          }else{
+            laserNum = 0 ;
+            lList[laserNum++] = new Laser(aList[r].aX,aList[r].aY);
+            }//end of <30
+         }
+       
+    }
+    
+  }
+}
+
 
 
 /*---------Check Laser Hit Ship-------------*/
@@ -212,15 +286,25 @@ void checkShipHit() {
   for (int i=0; i<lList.length-1; i++) {
     Laser laser = lList[i];
     if (laser!= null && !laser.gone // Check Array isn't empty and laser still exist
-    /*------------Hit detect-------------*/      ) {
+    /*------------Hit detect-------------*/   
+    &&  lList[i].lX <= (ship.posX + ship.shipSize)  
+    &&  lList[i].lX >= (ship.posX - ship.shipSize)
+    &&  lList[i].lY <= (ship.posY + ship.shipSize)
+    &&  lList[i].lY >= (ship.posY - ship.shipSize)
+    ) {//nowgoing here!!
       /*-------do something------*/
+      life--;
+      removeLaser(lList[i]);
+      if(life == 0){
+      status = GAME_LOSE ;
+      }
     }
   }
 }
 
 /*---------Check Win Lose------------------*/
 
-
+//ooopp
 void winAnimate() {
   int x = int(random(128))+70;
   fill(x, x, 256);
@@ -250,8 +334,21 @@ void loseAnimate() {
   expoInit+=5;
 }
 
+void checkRubyDrop(int score){
+  if(point >= score){
+  ruby.show = true;
+ }
+}
 /*---------Check Ruby Hit Ship-------------*/
-
+void checkRubyHit(){///here~
+if(   ruby.pX <= (ship.posX + ship.shipSize)  
+    &&  ruby.pX >= ship.posX
+    &&  ruby.pY  <= (ship.posY + ship.shipSize)
+    &&  ruby.pY  >= ship.posY
+){
+ship.upGrade = true;
+}
+}
 
 /*---------Check Level Up------------------*/
 
@@ -279,6 +376,7 @@ void removeAlien(Alien obj) {
 
 /*---------Reset Game-------------*/
 void reset() {
+   life = 3 ;
   for (int i=0; i<bList.length-1; i++) {
     bList[i] = null;
     lList[i] = null;
@@ -297,8 +395,8 @@ void reset() {
   
 
   /*-----------Call Make Alien Function--------*/
-  alienMaker();
-
+ alienMaker(33,7);//amount
+ 
   ship.posX = width/2;
   ship.posY = 460;
   ship.upGrade = false;
@@ -315,10 +413,22 @@ void statusCtrl() {
     case GAME_START:
       status = GAME_PLAYING;
       break;
-
-      /*-----------add things here--------*/
-
-    }
+  /*-----------add things here--------*/
+   case GAME_LOSE:
+      reset();
+      status = GAME_PLAYING;
+      break;
+   case GAME_WIN:
+      reset();
+      status = GAME_PLAYING;
+      break;
+   case GAME_PLAYING:
+      status = GAME_PAUSE;
+      break;
+   case  GAME_PAUSE:
+      status = GAME_PLAYING;
+      break; 
+     }
   }
 }
 
@@ -328,6 +438,8 @@ void cheatKeys() {
     ruby.show = true;
     ruby.pX = int(random(width));
     ruby.pY = -10;
+    
+//   println("where's ruby!!?");
   }
   if (key == 'Q'||key == 'q') {
     ship.upGrade = true;
@@ -343,4 +455,3 @@ void cheatKeys() {
     }
   }
 }
-
