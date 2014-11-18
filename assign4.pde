@@ -81,7 +81,7 @@ void draw() {
   
     
     /*---------Call functions---------------*/
-    checkRubyDrop(10);//woo//change
+    checkRubyDrop(200);//woo//change
     checkRubyHit();//woo
     rubyy();////////////////////////
     alienShoot(50);//woo~
