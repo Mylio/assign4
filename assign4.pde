@@ -20,6 +20,9 @@ int bulletNum;           //Bullet Order Number
 int life ;
 int laserNum;
 int countLaserFrame;
+//===
+int [] powerBullet = new int [30] ;
+//===
 
 
 void setup() {
@@ -72,10 +75,17 @@ void draw() {
     drawAlien();
     drawBullet();
     drawLaser();
+   
+  // ruby.display();
+/*   ruby.move();*/
+  
     
     /*---------Call functions---------------*/
     checkRubyDrop(10);//woo//change
+    checkRubyHit();//woo
+    rubyy();////////////////////////
     alienShoot(50);//woo~
+    cheatKeys();//woooo
     checkAlienDead();/*finish this function*/
     checkShipHit();  /*finish this function*/
     countBulletFrame+=1;
@@ -174,18 +184,7 @@ void drawLaser() {
 }
 
 //===============
-void drawRuby() {
-  for (int i=0; i<lList.length-1; i++) { 
-    Laser laser = lList[i];
-    if (laser!=null && !laser.gone) { // Check Array isn't empty and Laser still exist
-      laser.move();      //Move Laser
-      laser.display();   //Draw Laser
-      if (laser.lY>480) {//woo >480 
-        removeLaser(laser); //Remove Laser from the Screen
-      }
-    }
-  }
-}
+
 //===============
 
 void drawAlien() {
@@ -203,7 +202,7 @@ void drawAlien() {
     
     else if(alien == null && point == 33*10){//amount
       status = GAME_WIN ;
-    //now here
+    
     }
    
   }
@@ -333,20 +332,31 @@ void loseAnimate() {
   ellipse(ship.posX, ship.posY, expoInit, expoInit);
   expoInit+=5;
 }
+void rubyy(){
+  if(ruby.show){
+  ruby.display();
+  ruby.move(); 
+  }
 
+}
 void checkRubyDrop(int score){
   if(point >= score){
+ //  ruby.display(); xxx
+ //  ruby.move(); xxx
   ruby.show = true;
  }
 }
 /*---------Check Ruby Hit Ship-------------*/
-void checkRubyHit(){///here~
+void checkRubyHit(){
 if(   ruby.pX <= (ship.posX + ship.shipSize)  
-    &&  ruby.pX >= ship.posX
+    &&  ruby.pX >= (ship.posX - ship.shipSize)
     &&  ruby.pY  <= (ship.posY + ship.shipSize)
-    &&  ruby.pY  >= ship.posY
+    &&  ruby.pY  >= (ship.posY - ship.shipSize)
 ){
 ship.upGrade = true;
+ruby.pX = 2000;
+ruby.pY = 2000;
+
 }
 }
 
@@ -354,8 +364,6 @@ ship.upGrade = true;
 
 
 /*---------Print Text Function-------------*/
-
-
 void removeBullet(Bullet obj) {
   obj.gone = true;
   obj.bX = 2000;
@@ -435,11 +443,9 @@ void statusCtrl() {
 void cheatKeys() {
 
   if (key == 'R'||key == 'r') {
-    ruby.show = true;
-    ruby.pX = int(random(width));
-    ruby.pY = -10;
-    
-//   println("where's ruby!!?");
+
+  ruby.show = true;
+
   }
   if (key == 'Q'||key == 'q') {
     ship.upGrade = true;
