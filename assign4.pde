@@ -403,7 +403,7 @@ void reset() {
   
 
   /*-----------Call Make Alien Function--------*/
- alienMaker(53,7);//amount
+ alienMaker(53,10);//amount
  
   ship.posX = width/2;
   ship.posY = 460;
