@@ -200,7 +200,7 @@ void drawAlien() {
       /*--------------------------------------*/
     }
     
-    else if(alien == null && point == 33*10){//amount
+    else if(alien == null && point == 53*10){//amount
       status = GAME_WIN ;
     
     }
@@ -403,7 +403,7 @@ void reset() {
   
 
   /*-----------Call Make Alien Function--------*/
- alienMaker(33,7);//amount
+ alienMaker(53,7);//amount
  
   ship.posX = width/2;
   ship.posY = 460;
